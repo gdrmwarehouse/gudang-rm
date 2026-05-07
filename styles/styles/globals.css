@@ -1,0 +1,65 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  min-height: 100vh;
+}
+.container { max-width: 480px; margin: 0 auto; padding: 24px 16px; }
+.container-wide { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+.card { background: white; border-radius: 16px; padding: 28px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.app-header { text-align: center; margin-bottom: 28px; }
+.app-logo {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #1a56db, #0ea5e9);
+  border-radius: 14px; display: flex; align-items: center;
+  justify-content: center; margin: 0 auto 12px; font-size: 26px;
+}
+.app-title { font-size: 20px; font-weight: 700; color: #1a202c; }
+.app-subtitle { font-size: 13px; color: #718096; margin-top: 2px; }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 6px; }
+.form-label span { color: #a0aec0; font-weight: 400; }
+.form-input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; transition: border-color .2s;
+  background: #fafafa; color: #1a202c;
+}
+.form-input:focus { outline: none; border-color: #1a56db; background: white; }
+.form-input:disabled { background: #f7fafc; color: #718096; }
+textarea.form-input { resize: vertical; min-height: 80px; }
+.btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .2s, transform .1s; }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary { background: linear-gradient(135deg, #1a56db, #0ea5e9); color: white; }
+.btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+.btn-outline { background: white; border: 1.5px solid #e2e8f0; color: #4a5568; }
+.alert { padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
+.alert-error { background: #fff5f5; border: 1px solid #fed7d7; color: #c53030; }
+.alert-success { background: #f0fff4; border: 1px solid #c6f6d5; color: #276749; }
+.alert-info { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; }
+.link { color: #1a56db; text-decoration: none; font-size: 13px; }
+.link:hover { text-decoration: underline; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-reserved { background: #ebf8ff; color: #2b6cb0; }
+.badge-arrived  { background: #f0fff4; color: #276749; }
+.badge-done     { background: #e6fffa; color: #285e61; }
+.badge-late     { background: #fff5f5; color: #c53030; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f7fafc; padding: 10px 12px; text-align: left; font-weight: 600; color: #4a5568; border-bottom: 1.5px solid #e2e8f0; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; color: #2d3748; vertical-align: middle; }
+tr:hover td { background: #f7fafc; }
+.stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: white; border-radius: 14px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-num { font-size: 28px; font-weight: 700; }
+.stat-label { font-size: 12px; color: #718096; margin-top: 2px; }
+.ticket { background: white; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+.ticket::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #1a56db, #0ea5e9, #10b981); }
+.queue-number { font-size: 64px; font-weight: 900; color: #1a56db; line-height: 1; }
+.queue-label { font-size: 12px; color: #a0aec0; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.nav { background: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 24px; }
+.nav-title { font-weight: 700; font-size: 16px; color: #1a56db; }
+.nav-user { font-size: 12px; color: #718096; }
