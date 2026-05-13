@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default function Register() {
   const router = useRouter()
-  const [form, setForm] = useState({ email: '', company_name: '', username: '', password: '', confirm: '' })
+  const [form, setForm] = useState({ email:'', company_name:'', username:'', password:'', confirm:'' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -16,8 +16,8 @@ export default function Register() {
     setLoading(true); setError('')
     try {
       const res = await fetch('/api/register', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email, company_name: form.company_name, username: form.username, password: form.password })
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email:form.email, company_name:form.company_name, username:form.username, password:form.password })
       })
       const data = await res.json()
       if (!res.ok) { setError(data.message); return }
@@ -31,18 +31,21 @@ export default function Register() {
 
   return (
     <>
-      <Head><title>Daftar Akun Supplier — Gudang RM</title></Head>
-      <div className="container" style={{ paddingTop: 32 }}>
-        <div className="app-header">
-          <div className="app-logo">🏭</div>
-          <div className="app-title">Gudang Raw Material</div>
-          <div className="app-subtitle">Daftar Akun Supplier</div>
-        </div>
-        <div className="card">
+      <Head><title>Daftar Akun Supplier — Gudang RM Mayora</title></Head>
+      <div className="auth-bg">
+        <div className="auth-orb" />
+        <img src="https://companieslogo.com/img/orig/MYOR.JK-b5a4456a.png"
+          className="mayora-logo" alt="Mayora" onError={e => e.target.style.display='none'} />
+        <div className="auth-card" style={{ maxWidth:480 }}>
+          <div className="app-header">
+            <div className="app-logo">🏭</div>
+            <div className="app-title">Daftar Akun Supplier</div>
+            <div className="app-subtitle">Gudang Raw Material — Mayora Group</div>
+          </div>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleRegister}>
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">Email Perusahaan</label>
               <input className="form-input" type="email" placeholder="email@perusahaan.com" {...f('email')} required />
             </div>
             <div className="form-group">
@@ -53,19 +56,21 @@ export default function Register() {
               <label className="form-label">Username</label>
               <input className="form-input" placeholder="username untuk login" {...f('username')} required />
             </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input className="form-input" type="password" placeholder="Minimal 6 karakter" {...f('password')} required />
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+              <div className="form-group" style={{ marginBottom:0 }}>
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" placeholder="Min. 6 karakter" {...f('password')} required />
+              </div>
+              <div className="form-group" style={{ marginBottom:0 }}>
+                <label className="form-label">Konfirmasi</label>
+                <input className="form-input" type="password" placeholder="Ulangi password" {...f('confirm')} required />
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Konfirmasi Password</label>
-              <input className="form-input" type="password" placeholder="Ulangi password" {...f('confirm')} required />
-            </div>
-            <button className="btn btn-primary" type="submit" disabled={loading}>
-              {loading ? 'Memproses...' : 'Buat Akun'}
+            <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop:20 }}>
+              {loading ? 'Memproses...' : 'Buat Akun →'}
             </button>
           </form>
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <div style={{ textAlign:'center', marginTop:16, fontSize:13 }}>
             Sudah punya akun? <Link className="link" href="/">Login di sini</Link>
           </div>
         </div>
