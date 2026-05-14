@@ -18,10 +18,11 @@ export default async function handler(req, res) {
   if (!delivery_date || !estimated_arrival)
     return res.status(400).json({ message: 'Tanggal dan estimasi tiba wajib diisi' })
   const { data: queueData, error: queueError } = await supabase.rpc('get_next_queue', { p_date: delivery_date })
-  if (queueError) return res.status(500).json({ message: 'Gagal membuat nomor antrian' })
+  if (queueError) return res.status(500).json({ message: 'Gagal membuat nomor antrian: ' + queueError.message })
   const ticket_code = generateTicketCode()
-  const { data, error } = await supabase.from('reservations').insert({
-    supplier_id, company_name, email, delivery_date, estimated_arrival,
+  const insertData = {
+    supplier_id, company_name, email,
+    delivery_date, estimated_arrival,
     nama_produk: nama_produk || null,
     po_number: po_number || null,
     doc_number: doc_number || null,
@@ -29,8 +30,11 @@ export default async function handler(req, res) {
     plate_number: plate_number || null,
     driver_name: driver_name || null,
     contact_number: contact_number || null,
-    queue_number: queueData, ticket_code, status: 'reserved'
-  }).select().single()
-  if (error) return res.status(500).json({ message: 'Gagal menyimpan reservasi' })
+    queue_number: queueData,
+    ticket_code,
+    status: 'reserved'
+  }
+  const { data, error } = await supabase.from('reservations').insert(insertData).select().single()
+  if (error) return res.status(500).json({ message: 'Gagal menyimpan: ' + error.message })
   return res.status(200).json({ reservation_id: data.id, queue_number: queueData, ticket_code })
 }
