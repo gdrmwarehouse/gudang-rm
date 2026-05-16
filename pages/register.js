@@ -39,8 +39,8 @@ export default function Register() {
         <div className="auth-card" style={{ maxWidth:480 }}>
           <div className="app-header">
             <div className="app-logo">🏭</div>
-            <div className="app-title">Daftar Akun Supplier</div>
-            <div className="app-subtitle">Gudang Raw Material — Mayora Group</div>
+            <div className="app-title">Daftar Akun</div>
+            <div className="app-subtitle">GDRM — Mayora Jayanti 2</div>
           </div>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleRegister}>
@@ -62,7 +62,7 @@ export default function Register() {
                 <input className="form-input" type="password" placeholder="Min. 6 karakter" {...f('password')} required />
               </div>
               <div className="form-group" style={{ marginBottom:0 }}>
-                <label className="form-label">Konfirmasi</label>
+                <label className="form-label">Konfirm Password</label>
                 <input className="form-input" type="password" placeholder="Ulangi password" {...f('confirm')} required />
               </div>
             </div>
