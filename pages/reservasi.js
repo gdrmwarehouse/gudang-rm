@@ -56,17 +56,15 @@ export default function Reservasi() {
   }
 
   const fmtTime = (iso, deliveryDate) => {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false })
-  // Bandingkan tanggal timestamp dengan tanggal reservasi
-  const tglStamp = d.toISOString().split('T')[0]
-  const tglReservasi = deliveryDate || new Date().toISOString().split('T')[0]
-  if (tglStamp === tglReservasi) return jam
-  // Beda hari → tampil tanggal juga
-  const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' })
-  return tgl + ' ' + jam
-}
+    if (!iso) return '—'
+    const d = new Date(iso)
+    const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false })
+    const tglStamp = d.toISOString().split('T')[0]
+    const tglReservasi = deliveryDate || new Date().toISOString().split('T')[0]
+    if (tglStamp === tglReservasi) return jam
+    const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' })
+    return tgl + ' ' + jam
+  }
 
   const downloadExcel = async () => {
     if (history.length === 0) { alert('Tidak ada data untuk didownload'); return }
@@ -83,31 +81,27 @@ export default function Reservasi() {
       'Nama Sopir': r.driver_name || '-',
       'No. HP': r.contact_number || '-',
       'Status': { reserved:'Terdaftar', arrived:'Hadir', done:'Selesai Bongkar', late:'Terlambat' }[r.status] || r.status,
-      'Jam Hadir': fmtTime(r.arrived_at_time, r.delivery_date)
-fmtTime(r.start_bongkar, r.delivery_date)
-fmtTime(r.selesai_bongkar, r.delivery_date),
-      'Start Bongkar': fmtTime(r.start_bongkar),
-      'Selesai Bongkar': fmtTime(r.selesai_bongkar),
+      'Jam Hadir': fmtTime(r.arrived_at_time, r.delivery_date),
+      'Start Bongkar': fmtTime(r.start_bongkar, r.delivery_date),
+      'Selesai Bongkar': fmtTime(r.selesai_bongkar, r.delivery_date),
       'Kode Tiket': r.ticket_code,
-      'Tanggal Reservasi': new Date(r.created_at).toLocaleDateString('id-ID'),
+      'Tgl Reservasi': new Date(r.created_at).toLocaleDateString('id-ID'),
     }))
     const ws = XLSX.utils.json_to_sheet(rows)
-    // Auto column width
-    const colWidths = Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length, 15) }))
-    ws['!cols'] = colWidths
+    ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.max(k.length + 2, 16) }))
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Riwayat Reservasi')
-    XLSX.writeFile(wb, 'Riwayat_Reservasi_' + user.company_name.replace(/\s/g,'_') + '.xlsx')
+    XLSX.writeFile(wb, 'Riwayat_' + user.company_name.replace(/\s/g,'_') + '.xlsx')
   }
 
   if (!user) return null
   const today = new Date().toISOString().split('T')[0]
 
   const stMap = {
-    reserved: { label:'⏳ Terdaftar',       color:'#2d4db3', bg:'linear-gradient(135deg,#e8edff,#d4ddff)' },
-    arrived:  { label:'✅ Hadir',            color:'#00703c', bg:'linear-gradient(135deg,#e8fff3,#c3f4da)' },
-    done:     { label:'📦 Selesai Bongkar', color:'#005a4d', bg:'linear-gradient(135deg,#e8fffb,#b8f4ec)' },
-    late:     { label:'⏰ Terlambat',       color:'#c0001f', bg:'linear-gradient(135deg,#fff0f3,#ffd6dd)' },
+    reserved: { label:'⏳ Terdaftar',        color:'#2d4db3', bg:'linear-gradient(135deg,#e8edff,#d4ddff)' },
+    arrived:  { label:'✅ Hadir',             color:'#00703c', bg:'linear-gradient(135deg,#e8fff3,#c3f4da)' },
+    done:     { label:'📦 Selesai Bongkar',  color:'#005a4d', bg:'linear-gradient(135deg,#e8fffb,#b8f4ec)' },
+    late:     { label:'⏰ Terlambat',        color:'#c0001f', bg:'linear-gradient(135deg,#fff0f3,#ffd6dd)' },
   }
 
   return (
@@ -117,7 +111,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
         className="mayora-logo-dark" alt="" onError={e => e.target.style.display='none'} />
 
       <div className="nav">
-        <span className="nav-title">🏭 Gudang RM JAYANTI 2</span>
+        <span className="nav-title">🏭 Gudang RM</span>
         <span className="nav-user">
           {user.company_name} &nbsp;|&nbsp;
           <button className="link" style={{ border:'none', background:'none', cursor:'pointer' }}
@@ -143,7 +137,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
           }}>🕐 Riwayat</button>
         </div>
 
-        {/* FORM TAB */}
+        {/* ===== FORM TAB ===== */}
         {tab === 'form' && (
           <div className="card">
             <h2 style={{ fontSize:17, fontWeight:800, marginBottom:20, fontFamily:'Syne,sans-serif', background:'linear-gradient(135deg,#667eea,#f5576c)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
@@ -178,7 +172,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
               </div>
               <div className="form-group">
                 <label className="form-label">No. Purchase Order <span>(opsional)</span></label>
-                <input className="form-input" placeholder="150648XXX" {...f('po_number')} />
+                <input className="form-input" placeholder="PO-2024-XXXX" {...f('po_number')} />
               </div>
               <div className="form-group">
                 <label className="form-label">No. Dokumen Lain <span>(opsional)</span></label>
@@ -186,7 +180,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
               </div>
               <div className="form-group">
                 <label className="form-label">Keterangan Tambahan <span>(opsional)</span></label>
-                <textarea className="form-input" placeholder="Jumlah barang, catatan khusus, dll" {...f('notes')} />
+                <textarea className="form-input" placeholder="Jenis barang, jumlah, catatan khusus, dll" {...f('notes')} />
               </div>
 
               <div className="section-divider" style={{ marginTop:8 }}>
@@ -198,7 +192,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
               </div>
               <div className="form-group">
                 <label className="form-label">Nama Sopir <span>(opsional)</span></label>
-                <input className="form-input" placeholder="Nama Sopir" {...f('driver_name')} />
+                <input className="form-input" placeholder="Nama lengkap sopir" {...f('driver_name')} />
               </div>
               <div className="form-group">
                 <label className="form-label">No. HP yang Dapat Dihubungi <span>(opsional)</span></label>
@@ -212,10 +206,9 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
           </div>
         )}
 
-        {/* HISTORY TAB */}
+        {/* ===== HISTORY TAB ===== */}
         {tab === 'history' && (
           <div>
-            {/* Header + Download button */}
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
               <div style={{ fontSize:15, fontWeight:800, fontFamily:'Syne,sans-serif', background:'linear-gradient(135deg,#667eea,#f5576c)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
                 🕐 Riwayat Reservasi
@@ -236,7 +229,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
                 {[
                   ['Total', history.length, '#667eea'],
                   ['Selesai', history.filter(r=>r.status==='done').length, '#43e97b'],
-                  ['Terdaftar', history.filter(r=>r.status==='reserved').length, '#fa709a'],
+                  ['Terdaftar', history.filter(r=>r.status==='reserved'||r.status==='arrived').length, '#fa709a'],
                 ].map(([l,n,c]) => (
                   <div key={l} style={{ background:'white', borderRadius:12, padding:'12px', textAlign:'center', boxShadow:'0 2px 8px rgba(102,126,234,0.1)', border:'1px solid rgba(102,126,234,0.1)' }}>
                     <div style={{ fontSize:24, fontWeight:800, fontFamily:'Syne,sans-serif', color:c }}>{n}</div>
@@ -260,13 +253,14 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
             {!histLoading && history.map(r => {
               const st = stMap[r.status] || stMap.reserved
               const tgl = new Date(r.delivery_date).toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
+              const sudahAktif = r.status === 'arrived' || r.status === 'done'
               return (
                 <div key={r.id} className="card" style={{ marginBottom:12, padding:'16px 18px', cursor:'pointer', transition:'box-shadow .2s' }}
                   onMouseEnter={e=>e.currentTarget.style.boxShadow='0 8px 24px rgba(102,126,234,0.2)'}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow=''}
                   onClick={() => router.push('/tiket?id=' + r.id)}>
 
-                  {/* Header row */}
+                  {/* Header */}
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                       <div style={{ fontFamily:'Syne,sans-serif', fontWeight:800, fontSize:20, background:'linear-gradient(135deg,#667eea,#f5576c)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
@@ -316,15 +310,13 @@ fmtTime(r.selesai_bongkar, r.delivery_date),
                     )}
                   </div>
 
-                  {/* Waktu bongkar jika selesai */}
-                  {(r.status === 'done' || r.status === 'arrived') && (
-                    <div style={{ marginTop:10, padding:'8px 12px', background:'linear-gradient(135deg,#f0f4ff,#f8f0ff)', borderRadius:8, fontSize:11, display:'flex', gap:16, flexWrap:'wrap' }}>
+                  {/* Waktu bongkar */}
+                  {sudahAktif && (
+                    <div style={{ marginTop:10, padding:'8px 12px', background:'linear-gradient(135deg,#f0f4ff,#f8f0ff)', borderRadius:8, fontSize:11, display:'flex', gap:12, flexWrap:'wrap' }}>
                       <span style={{ color:'#6b7a99' }}>📅 Est: <strong style={{ color:'#1a1a2e' }}>{r.estimated_arrival?.slice(0,5)||'—'}</strong></span>
-                      <span style={{ color:'#6b7a99' }}>✅ Hadir: <strong style={{ color:'#00703c' }}>{fmtTime(r.arrived_at_time, r.delivery_date)
-fmtTime(r.start_bongkar, r.delivery_date)
-fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
-                      <span style={{ color:'#6b7a99' }}>🔧 Start: <strong style={{ color:'#d97706' }}>{fmtTime(r.start_bongkar)}</strong></span>
-                      <span style={{ color:'#6b7a99' }}>📦 Selesai: <strong style={{ color:'#0891b2' }}>{fmtTime(r.selesai_bongkar)}</strong></span>
+                      <span style={{ color:'#6b7a99' }}>✅ Hadir: <strong style={{ color:'#00703c' }}>{fmtTime(r.arrived_at_time, r.delivery_date)}</strong></span>
+                      <span style={{ color:'#6b7a99' }}>🔧 Start: <strong style={{ color:'#d97706' }}>{fmtTime(r.start_bongkar, r.delivery_date)}</strong></span>
+                      <span style={{ color:'#6b7a99' }}>📦 Selesai: <strong style={{ color:'#0891b2' }}>{fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
                     </div>
                   )}
 
@@ -342,7 +334,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
             })}
 
             {history.length > 0 && (
-              <div style={{ textAlign:'center', marginTop:8 }}>
+              <div style={{ textAlign:'center', marginTop:8, paddingBottom:20 }}>
                 <button onClick={downloadExcel} style={{ padding:'10px 24px', fontSize:13, fontWeight:700, cursor:'pointer', borderRadius:10, background:'linear-gradient(135deg,#43e97b,#38f9d7)', color:'#1a3a2a', border:'none', boxShadow:'0 4px 12px rgba(67,233,123,0.3)' }}>
                   📥 Download Semua Riwayat (.xlsx)
                 </button>
