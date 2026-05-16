@@ -83,7 +83,9 @@ export default function Reservasi() {
       'Nama Sopir': r.driver_name || '-',
       'No. HP': r.contact_number || '-',
       'Status': { reserved:'Terdaftar', arrived:'Hadir', done:'Selesai Bongkar', late:'Terlambat' }[r.status] || r.status,
-      'Jam Hadir': fmtTime(r.arrived_at_time),
+      'Jam Hadir': fmtTime(r.arrived_at_time, r.delivery_date)
+fmtTime(r.start_bongkar, r.delivery_date)
+fmtTime(r.selesai_bongkar, r.delivery_date),
       'Start Bongkar': fmtTime(r.start_bongkar),
       'Selesai Bongkar': fmtTime(r.selesai_bongkar),
       'Kode Tiket': r.ticket_code,
@@ -318,7 +320,9 @@ export default function Reservasi() {
                   {(r.status === 'done' || r.status === 'arrived') && (
                     <div style={{ marginTop:10, padding:'8px 12px', background:'linear-gradient(135deg,#f0f4ff,#f8f0ff)', borderRadius:8, fontSize:11, display:'flex', gap:16, flexWrap:'wrap' }}>
                       <span style={{ color:'#6b7a99' }}>📅 Est: <strong style={{ color:'#1a1a2e' }}>{r.estimated_arrival?.slice(0,5)||'—'}</strong></span>
-                      <span style={{ color:'#6b7a99' }}>✅ Hadir: <strong style={{ color:'#00703c' }}>{fmtTime(r.arrived_at_time)}</strong></span>
+                      <span style={{ color:'#6b7a99' }}>✅ Hadir: <strong style={{ color:'#00703c' }}>{fmtTime(r.arrived_at_time, r.delivery_date)
+fmtTime(r.start_bongkar, r.delivery_date)
+fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
                       <span style={{ color:'#6b7a99' }}>🔧 Start: <strong style={{ color:'#d97706' }}>{fmtTime(r.start_bongkar)}</strong></span>
                       <span style={{ color:'#6b7a99' }}>📦 Selesai: <strong style={{ color:'#0891b2' }}>{fmtTime(r.selesai_bongkar)}</strong></span>
                     </div>
