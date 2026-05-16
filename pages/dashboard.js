@@ -110,7 +110,9 @@ export default function Dashboard() {
       const ket = r.notes ? ' | Ket: ' + r.notes : ''
       const waktu = r.status === 'done' || r.status === 'arrived'
         ? '\n   ⏱ Est: ' + (r.estimated_arrival?.slice(0,5)||'-') +
-          ' | Hadir: ' + fmtTime(r.arrived_at_time) +
+          ' | Hadir: ' + fmtTime(r.arrived_at_time, r.delivery_date)
+fmtTime(r.start_bongkar, r.delivery_date)
+fmtTime(r.selesai_bongkar, r.delivery_date) +
           ' | Start: ' + fmtTime(r.start_bongkar) +
           ' | Selesai: ' + fmtTime(r.selesai_bongkar)
         : ''
@@ -273,7 +275,9 @@ export default function Dashboard() {
                       <td style={{fontSize:11,minWidth:120}}>
                         <div style={{display:'flex',flexDirection:'column',gap:3}}>
                           <span style={{color:'#6b7a99'}}>📅 Est: <strong style={{color:'#1a1a2e'}}>{r.estimated_arrival?.slice(0,5)||'—'}</strong></span>
-                          <span style={{color:'#6b7a99'}}>✅ Hadir: <strong style={{color:'#00703c'}}>{fmtTime(r.arrived_at_time)}</strong></span>
+                          <span style={{color:'#6b7a99'}}>✅ Hadir: <strong style={{color:'#00703c'}}>{fmtTime(r.arrived_at_time, r.delivery_date)
+fmtTime(r.start_bongkar, r.delivery_date)
+fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
                           <span style={{color:'#6b7a99'}}>🔧 Start: <strong style={{color:'#d97706'}}>{fmtTime(r.start_bongkar)}</strong></span>
                           <span style={{color:'#6b7a99'}}>📦 Selesai: <strong style={{color:'#0891b2'}}>{fmtTime(r.selesai_bongkar)}</strong></span>
                         </div>
