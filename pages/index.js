@@ -36,7 +36,7 @@ export default function Login() {
         <div className="auth-card">
           <div className="app-header">
             <div className="app-logo">🏭</div>
-            <div className="app-title">Gudang Raw Material Jayanti 2</div>
+            <div className="app-title">GDRM      Mayora Jayanti 2</div>
             <div className="app-subtitle">Portal Supplier </div>
           </div>
           {!showForgot ? (
