@@ -55,10 +55,18 @@ export default function Reservasi() {
     finally { setLoading(false) }
   }
 
-  const fmtTime = (iso) => {
-    if (!iso) return '—'
-    return new Date(iso).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false })
-  }
+  const fmtTime = (iso, deliveryDate) => {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false })
+  // Bandingkan tanggal timestamp dengan tanggal reservasi
+  const tglStamp = d.toISOString().split('T')[0]
+  const tglReservasi = deliveryDate || new Date().toISOString().split('T')[0]
+  if (tglStamp === tglReservasi) return jam
+  // Beda hari → tampil tanggal juga
+  const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' })
+  return tgl + ' ' + jam
+}
 
   const downloadExcel = async () => {
     if (history.length === 0) { alert('Tidak ada data untuk didownload'); return }
