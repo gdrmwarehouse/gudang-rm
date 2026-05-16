@@ -28,26 +28,21 @@ export default function Dashboard() {
 
   const updateStatus = async (id, status, extra = {}) => {
     setUpdating(id + status)
-    const now = new Date().toISOString()
-    const updateData = { status, ...extra }
-    if (status === 'arrived') updateData.arrived_at_time = now
-    await supabase.from('reservations').update(updateData).eq('id', id)
+    await supabase.from('reservations').update({ status, ...extra }).eq('id', id)
     await fetchData()
     setUpdating(null)
   }
 
   const setStartBongkar = async (id) => {
     setUpdating(id + 'start')
-    const now = new Date().toISOString()
-    await supabase.from('reservations').update({ start_bongkar: now }).eq('id', id)
+    await supabase.from('reservations').update({ start_bongkar: new Date().toISOString() }).eq('id', id)
     await fetchData()
     setUpdating(null)
   }
 
   const setSelesaiBongkar = async (id) => {
     setUpdating(id + 'done')
-    const now = new Date().toISOString()
-    await supabase.from('reservations').update({ selesai_bongkar: now, status: 'done' }).eq('id', id)
+    await supabase.from('reservations').update({ selesai_bongkar: new Date().toISOString(), status: 'done' }).eq('id', id)
     await fetchData()
     setUpdating(null)
   }
@@ -57,18 +52,16 @@ export default function Dashboard() {
     return r.status === 'reserved' && now > cut
   }
 
- const fmtTime = (iso, deliveryDate) => {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false })
-  // Bandingkan tanggal timestamp dengan tanggal reservasi
-  const tglStamp = d.toISOString().split('T')[0]
-  const tglReservasi = deliveryDate || new Date().toISOString().split('T')[0]
-  if (tglStamp === tglReservasi) return jam
-  // Beda hari → tampil tanggal juga
-  const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' })
-  return tgl + ' ' + jam
-}
+  const fmtTime = (iso, deliveryDate) => {
+    if (!iso) return '—'
+    const d = new Date(iso)
+    const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', hour12:false })
+    const tglStamp = d.toISOString().split('T')[0]
+    const tglReservasi = deliveryDate || new Date().toISOString().split('T')[0]
+    if (tglStamp === tglReservasi) return jam
+    const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' })
+    return tgl + ' ' + jam
+  }
 
   const exportExcel = async () => {
     const XLSX = await import('xlsx')
@@ -86,9 +79,9 @@ export default function Dashboard() {
       'No. Polisi': r.plate_number || '-',
       'No. HP': r.contact_number || '-',
       'Status': isLate(r) ? 'Terlambat' : {reserved:'Terdaftar',arrived:'Hadir',done:'Selesai',late:'Terlambat'}[r.status] || r.status,
-      'Jam Hadir': fmtTime(r.arrived_at_time),
-      'Start Bongkar': fmtTime(r.start_bongkar),
-      'Selesai Bongkar': fmtTime(r.selesai_bongkar),
+      'Jam Hadir': fmtTime(r.arrived_at_time, r.delivery_date),
+      'Start Bongkar': fmtTime(r.start_bongkar, r.delivery_date),
+      'Selesai Bongkar': fmtTime(r.selesai_bongkar, r.delivery_date),
     }))
     const ws = XLSX.utils.json_to_sheet(rows)
     const wb = XLSX.utils.book_new()
@@ -105,32 +98,28 @@ export default function Dashboard() {
     const terlambat = reservations.filter(r => isLate(r) || r.status === 'late').length
 
     const detail = reservations.map(r => {
-      const st = isLate(r) ? '⏰ Terlambat' : {reserved:'⏳ Belum datang', arrived:'✅ Hadir', done:'📦 Selesai', late:'⏰ Terlambat'}[r.status] || r.status
-      const produk = r.nama_produk ? ' | Produk: ' + r.nama_produk : ''
-      const ket = r.notes ? ' | Ket: ' + r.notes : ''
-      const waktu = r.status === 'done' || r.status === 'arrived'
+      const st = isLate(r) ? '⏰ Terlambat' : {reserved:'⏳ Belum datang',arrived:'✅ Hadir',done:'📦 Selesai',late:'⏰ Terlambat'}[r.status] || r.status
+      const produk = r.nama_produk ? ' | ' + r.nama_produk : ''
+      const ket = r.notes ? ' | ' + r.notes : ''
+      const waktu = (r.status === 'done' || r.status === 'arrived')
         ? '\n   ⏱ Est: ' + (r.estimated_arrival?.slice(0,5)||'-') +
-          ' | Hadir: ' + fmtTime(r.arrived_at_time, r.delivery_date)
-fmtTime(r.start_bongkar, r.delivery_date)
-fmtTime(r.selesai_bongkar, r.delivery_date) +
-          ' | Start: ' + fmtTime(r.start_bongkar) +
-          ' | Selesai: ' + fmtTime(r.selesai_bongkar)
+          ' | Hadir: ' + fmtTime(r.arrived_at_time, r.delivery_date) +
+          ' | Start: ' + fmtTime(r.start_bongkar, r.delivery_date) +
+          ' | Selesai: ' + fmtTime(r.selesai_bongkar, r.delivery_date)
         : ''
       return '#' + String(r.queue_number).padStart(3,'0') + ' ' + r.company_name + produk + ket + ' — ' + st + waktu
     }).join('\n')
 
     const msg =
-      '🏭 *RANGKUMAN PENERIMAAN GUDANG RM*\n' +
-      '*Mayora Group*\n' +
-      '📅 ' + tgl + '\n\n' +
+      '🏭 *RANGKUMAN PENERIMAAN GUDANG RM*\n*Mayora Jayanti 2*\n📅 ' + tgl + '\n\n' +
       '📊 *STATISTIK*\n' +
-      '• Total Reservasi: ' + total + ' kendaraan\n' +
-      '• Sudah Hadir: ' + hadir + ' kendaraan\n' +
+      '• Total: ' + total + ' kendaraan\n' +
+      '• Hadir: ' + hadir + ' kendaraan\n' +
       '• Selesai Bongkar: ' + selesai + ' kendaraan\n' +
       '• Belum Datang: ' + belum + ' kendaraan\n' +
-      (terlambat > 0 ? '• ⚠️ Terlambat/Inap: ' + terlambat + ' kendaraan\n' : '') +
-      '\n📋 *DETAIL KEDATANGAN*\n' + detail +
-      '\n\n_Dikirim dari Sistem Gudang RM Mayora_'
+      (terlambat > 0 ? '• ⚠️ Terlambat: ' + terlambat + ' kendaraan\n' : '') +
+      '\n📋 *DETAIL*\n' + detail +
+      '\n\n_Sistem Gudang RM Mayora Jayanti 2_'
     window.open('https://wa.me/6285136513273?text=' + encodeURIComponent(msg), '_blank')
   }
 
@@ -158,9 +147,9 @@ fmtTime(r.selesai_bongkar, r.delivery_date) +
         <div className="auth-orb" />
         <div className="auth-card">
           <div className="app-header">
-            <div className="app-logo">📦</div>
-            <div className="app-title">DASHBOARD INCOMING GDRM JN 2</div>
-            <div className="app-subtitle">GDRM — Mayora JN2</div>
+            <div className="app-logo">📊</div>
+            <div className="app-title">Dashboard Monitoring Incoming GDRM Jayanti 2</div>
+            <div className="app-subtitle"> Gudang TRANSPARAN, GUDANG AMAN</div>
           </div>
           {pwErr && <div className="alert alert-error">{pwErr}</div>}
           <div className="form-group">
@@ -179,7 +168,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date) +
     <>
       <Head><title>Dashboard Monitoring — Gudang RM</title></Head>
       <div className="nav">
-        <span className="nav-title">🟩 Dashboard Reservasi dan Kedatangan GDRM JN2</span>
+        <span className="nav-title">📊 Dashboard Gudang RM Jayanti 2</span>
         <span className="nav-user" style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
           <input type="date" value={date} onChange={e => setDate(e.target.value)}
             style={{ border:'1px solid #e8ecf4', borderRadius:8, padding:'4px 10px', fontSize:12, color:'#6b7a99', cursor:'pointer', fontFamily:'inherit' }} />
@@ -221,9 +210,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date) +
               color: filter===v ? 'white' : '#6b7a99',
               border: filter===v ? 'none' : '1.5px solid #e8ecf4',
               boxShadow: filter===v ? '0 4px 12px rgba(102,126,234,0.3)' : 'none'
-            }}>
-              {l} ({counts[v] ?? 0})
-            </button>
+            }}>{l} ({counts[v] ?? 0})</button>
           ))}
         </div>
 
@@ -251,7 +238,7 @@ fmtTime(r.selesai_bongkar, r.delivery_date) +
                   const late = isLate(r); const st = late ? 'late' : r.status
                   const stCls = {reserved:'badge-reserved',arrived:'badge-arrived',done:'badge-done',late:'badge-late'}
                   const stLbl = {reserved:'Terdaftar',arrived:'Hadir',done:'Selesai',late:'⏰ Terlambat'}
-                  const isUpdating = (suf) => updating === r.id + suf
+                  const isUpd = (suf) => updating === r.id + suf
                   return (
                     <tr key={r.id} style={{background: late ? '#fff5f7' : 'transparent'}}>
                       <td style={{fontWeight:800,fontSize:17,fontFamily:'Syne,sans-serif',background:'linear-gradient(135deg,#667eea,#f5576c)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
@@ -272,33 +259,31 @@ fmtTime(r.selesai_bongkar, r.delivery_date) +
                         <div style={{fontSize:11,color:'#b0bdd0'}}>{r.plate_number||''}</div>
                       </td>
                       <td style={{fontSize:12}}>{r.contact_number||'—'}</td>
-                      <td style={{fontSize:11,minWidth:120}}>
+                      <td style={{fontSize:11,minWidth:130}}>
                         <div style={{display:'flex',flexDirection:'column',gap:3}}>
                           <span style={{color:'#6b7a99'}}>📅 Est: <strong style={{color:'#1a1a2e'}}>{r.estimated_arrival?.slice(0,5)||'—'}</strong></span>
-                          <span style={{color:'#6b7a99'}}>✅ Hadir: <strong style={{color:'#00703c'}}>{fmtTime(r.arrived_at_time, r.delivery_date)
-fmtTime(r.start_bongkar, r.delivery_date)
-fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
-                          <span style={{color:'#6b7a99'}}>🔧 Start: <strong style={{color:'#d97706'}}>{fmtTime(r.start_bongkar)}</strong></span>
-                          <span style={{color:'#6b7a99'}}>📦 Selesai: <strong style={{color:'#0891b2'}}>{fmtTime(r.selesai_bongkar)}</strong></span>
+                          <span style={{color:'#6b7a99'}}>✅ Hadir: <strong style={{color:'#00703c'}}>{fmtTime(r.arrived_at_time, r.delivery_date)}</strong></span>
+                          <span style={{color:'#6b7a99'}}>🔧 Start: <strong style={{color:'#d97706'}}>{fmtTime(r.start_bongkar, r.delivery_date)}</strong></span>
+                          <span style={{color:'#6b7a99'}}>📦 Selesai: <strong style={{color:'#0891b2'}}>{fmtTime(r.selesai_bongkar, r.delivery_date)}</strong></span>
                         </div>
                       </td>
                       <td><span className={'badge '+(stCls[st]||'badge-reserved')}>{stLbl[st]||r.status}</span></td>
                       <td>
-                        <div style={{display:'flex',flexDirection:'column',gap:5,minWidth:110}}>
+                        <div style={{display:'flex',flexDirection:'column',gap:5,minWidth:120}}>
                           {r.status==='reserved' && (
-                            <button onClick={()=>updateStatus(r.id,'arrived',{arrived_at_time:new Date().toISOString()})} disabled={isUpdating('arrived')}
+                            <button onClick={()=>updateStatus(r.id,'arrived',{arrived_at_time:new Date().toISOString()})} disabled={isUpd('arrived')}
                               style={{padding:'5px 10px',fontSize:11,background:'linear-gradient(135deg,#43e97b,#38f9d7)',color:'#1a3a2a',border:'none',borderRadius:8,cursor:'pointer',fontWeight:700}}>
                               ✅ Hadir
                             </button>
                           )}
                           {r.status==='arrived' && !r.start_bongkar && (
-                            <button onClick={()=>setStartBongkar(r.id)} disabled={isUpdating('start')}
+                            <button onClick={()=>setStartBongkar(r.id)} disabled={isUpd('start')}
                               style={{padding:'5px 10px',fontSize:11,background:'linear-gradient(135deg,#fa709a,#fee140)',color:'#1a1a2e',border:'none',borderRadius:8,cursor:'pointer',fontWeight:700}}>
                               🔧 Start Bongkar
                             </button>
                           )}
                           {r.status==='arrived' && r.start_bongkar && !r.selesai_bongkar && (
-                            <button onClick={()=>setSelesaiBongkar(r.id)} disabled={isUpdating('done')}
+                            <button onClick={()=>setSelesaiBongkar(r.id)} disabled={isUpd('done')}
                               style={{padding:'5px 10px',fontSize:11,background:'linear-gradient(135deg,#4facfe,#00f2fe)',color:'#1a2a3a',border:'none',borderRadius:8,cursor:'pointer',fontWeight:700}}>
                               📦 Selesai Bongkar
                             </button>
